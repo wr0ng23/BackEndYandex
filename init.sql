@@ -20,8 +20,14 @@ return (select type
 create function check_parent(uuid) returns boolean
 return get_type($1) = 'CATEGORY' OR get_type($1) is null;
 
+create function check_child(uuid) returns boolean
+return (select count(*)
+        from shop_unit
+        where parent_id = $1) = 0;
+
 alter table shop_unit
-    add constraint type_check check (check_parent(shop_unit.parent_id));
+    add constraint type_check check (check_parent(shop_unit.parent_id) and
+                                     (shop_unit.type = 'CATEGORY' or check_child(shop_unit.id)));
 
 alter table shop_unit
     add constraint price_check check ((shop_unit.type = 'CATEGORY' and shop_unit.price is null) or

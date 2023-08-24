@@ -38,7 +38,7 @@ public class ShopUnit {
     private LocalDateTime date;
 
     public static class ShopUnitBuilder {
-        private static final ShopUnit shopUnit = new ShopUnit();
+        private final ShopUnit shopUnit = new ShopUnit();
 
         public ShopUnitBuilder setId(UUID id) {
             shopUnit.id = id;
