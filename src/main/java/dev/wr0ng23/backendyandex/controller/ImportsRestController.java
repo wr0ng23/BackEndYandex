@@ -15,7 +15,6 @@ import java.time.LocalDateTime;
 import java.util.List;
 
 @RestController
-@ResponseStatus(value = HttpStatus.OK)
 public class ImportsRestController {
     ImportService importService;
 
@@ -25,6 +24,7 @@ public class ImportsRestController {
     }
 
     @PostMapping("/imports")
+    @ResponseStatus(value = HttpStatus.OK)
     public ImportResponse getImports(@RequestBody ShopImportRequest shopImportRequest) {
         LocalDateTime date = shopImportRequest.getUpdateDate();
         List<ShopUnit> shopUnits = shopImportRequest
