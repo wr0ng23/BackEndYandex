@@ -1,6 +1,5 @@
 package dev.wr0ng23.backendyandex.dto;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
 import dev.wr0ng23.backendyandex.enums.ShopUnitType;
 import dev.wr0ng23.backendyandex.model.entity.ShopUnit;
 
@@ -9,7 +8,7 @@ import java.util.UUID;
 
 public record ShopUnitImport(UUID id,
                              String name,
-                             @JsonProperty(value = "parent_id") UUID parentId,
+                             UUID parentId,
                              Integer price,
                              ShopUnitType type) {
 

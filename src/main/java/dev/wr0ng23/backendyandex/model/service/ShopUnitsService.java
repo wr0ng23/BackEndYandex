@@ -7,6 +7,7 @@ import java.util.UUID;
 
 public interface ShopUnitsService {
     void saveAll(List<ShopUnit> shopUnits);
+
     void deleteItem(UUID uuid);
 
     ShopUnit getItem(UUID uuid);

@@ -6,6 +6,6 @@ import org.springframework.data.repository.CrudRepository;
 import java.util.List;
 import java.util.UUID;
 
-public interface ImportRepository extends CrudRepository<ShopUnit, UUID> {
+public interface ShopUnitsRepository extends CrudRepository<ShopUnit, UUID> {
     List<ShopUnit> findAllByParentId(UUID uuid);
 }
