@@ -2,8 +2,8 @@ package dev.wr0ng23.backendyandex.controller;
 
 import dev.wr0ng23.backendyandex.dto.ShopImportRequest;
 import dev.wr0ng23.backendyandex.model.entity.ShopUnit;
-import dev.wr0ng23.backendyandex.model.reponse.ImportResponse;
-import dev.wr0ng23.backendyandex.model.service.ImportService;
+import dev.wr0ng23.backendyandex.dto.Response;
+import dev.wr0ng23.backendyandex.model.service.ShopUnitsService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -16,25 +16,25 @@ import java.util.List;
 
 @RestController
 public class ImportsRestController {
-    ImportService importService;
+    ShopUnitsService shopUnitsService;
 
     @Autowired
-    public ImportsRestController(ImportService importService) {
-        this.importService = importService;
+    public ImportsRestController(ShopUnitsService shopUnitsService) {
+        this.shopUnitsService = shopUnitsService;
     }
 
     @PostMapping("/imports")
     @ResponseStatus(value = HttpStatus.OK)
-    public ImportResponse getImports(@RequestBody ShopImportRequest shopImportRequest) {
-        LocalDateTime date = shopImportRequest.getUpdateDate();
+    public Response postShopUnits(@RequestBody ShopImportRequest shopImportRequest) {
+        LocalDateTime date = shopImportRequest.updateDate();
         List<ShopUnit> shopUnits = shopImportRequest
-                .getItems()
+                .items()
                 .stream()
                 .map(shopUnit -> shopUnit.toShopUnit(date))
                 .toList();
 
-        importService.saveAll(shopUnits);
+        shopUnitsService.saveAll(shopUnits);
 
-        return new ImportResponse(200);
+        return new Response(200, "Successful insertion or update!");
     }
 }

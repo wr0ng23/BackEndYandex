@@ -8,13 +8,14 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.UUID;
 
-@Entity
-@Table(name = "shop_unit")
 @Getter
 @Setter
 @NoArgsConstructor
+@Entity
+@Table(name = "shop_unit")
 public class ShopUnit {
     @Id
     @Column(name = "id", nullable = false)
@@ -36,6 +37,11 @@ public class ShopUnit {
     @JsonFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss'Z'")
     @Column(name = "date", nullable = false)
     private LocalDateTime date;
+
+    @Transient
+    // This field will be ignoring
+    // when we will be persisted object into database
+    private List<ShopUnit> children;
 
     public static class ShopUnitBuilder {
         private final ShopUnit shopUnit = new ShopUnit();
