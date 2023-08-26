@@ -1,6 +1,7 @@
 package dev.wr0ng23.backendyandex.model.entity;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import dev.wr0ng23.backendyandex.enums.ShopUnitType;
 import jakarta.persistence.*;
 import lombok.Getter;
@@ -19,28 +20,35 @@ import java.util.UUID;
 public class ShopUnit {
     @Id
     @Column(name = "id", nullable = false)
+    @JsonProperty(index = 1)
     private UUID id;
 
     @Column(name = "name", nullable = false)
+    @JsonProperty(index = 2)
     private String name;
 
     @Column(name = "parent_id")
+    @JsonProperty(index = 3)
     private UUID parentId;
 
     @Column(name = "price")
+    @JsonProperty(index = 4)
     private Integer price;
 
     @Enumerated(EnumType.STRING)
     @Column(name = "type", nullable = false)
+    @JsonProperty(index = 5)
     private ShopUnitType type;
 
     @JsonFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss'Z'")
     @Column(name = "date", nullable = false)
+    @JsonProperty(index = 6)
     private LocalDateTime date;
 
-    @Transient
     // This field will be ignoring
     // when we will be persisted object into database
+    @Transient
+    @JsonProperty(index = 7)
     private List<ShopUnit> children;
 
     public static class ShopUnitBuilder {

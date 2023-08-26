@@ -9,6 +9,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.UUID;
+import java.util.concurrent.atomic.AtomicInteger;
 
 @Service
 public class ShopUnitsServiceImpl implements ShopUnitsService {
@@ -19,8 +20,29 @@ public class ShopUnitsServiceImpl implements ShopUnitsService {
         this.shopUnitsRepository = shopUnitsRepository;
     }
 
+    private void findAllParents(ShopUnit shopUnit) {
+        if (shopUnit.getParentId() != null) {
+            var parentOptional = shopUnitsRepository.findById(shopUnit.getParentId());
+            if (parentOptional.isEmpty()) {
+                return;
+            }
+            ShopUnit parent = parentOptional.get();
+            parent.setDate(shopUnit.getDate());
+            findAllParents(parent);
+        }
+    }
+
     @Override
     public void saveAll(List<ShopUnit> shopUnits) {
+        // Pizdec circ
+        // Update date..
+        shopUnits.stream()
+                .filter(shopUnit -> (shopUnit.getParentId() != null) &&
+                        shopUnits.stream()
+                                .allMatch(shopUnit1 ->
+                                        shopUnit1.getId() != shopUnit.getParentId()))
+                .forEach(this::findAllParents);
+
         shopUnitsRepository.saveAll(shopUnits);
     }
 
@@ -59,19 +81,25 @@ public class ShopUnitsServiceImpl implements ShopUnitsService {
         return shopUnit;
     }
 
-    private void findAllChildren(ShopUnit shopUnit) {
+    private int findAllChildren(ShopUnit shopUnit) {
         var children = shopUnitsRepository.findAllByParentId(shopUnit.getId());
+        AtomicInteger size = new AtomicInteger();
         if (!children.isEmpty()) {
             shopUnit.setChildren(children);
             children.forEach(child -> {
                 if (child.getType() == ShopUnitType.CATEGORY) {
-                    findAllChildren(child);
+                    size.addAndGet(findAllChildren(child));
                 }
                 //Strashno
-                shopUnit.setPrice(((shopUnit.getPrice() == null) ? 0 : shopUnit.getPrice())
-                        + ((child.getPrice() == null) ? 0 : child.getPrice()));
+                // Kogdato budet more beautiful but ne segodnya
+                shopUnit.setPrice(((shopUnit.getPrice() == null) ?
+                        0 : shopUnit.getPrice()) + ((child.getType() == ShopUnitType.CATEGORY) ?
+                        child.getPrice() * child.getChildren().size() : child.getPrice()));
             });
-            shopUnit.setPrice(shopUnit.getPrice() / children.size());
+            shopUnit.setPrice(shopUnit.getPrice() / ((size.get() == 0) ?
+                    shopUnit.getChildren().size() : size.get()));
+            return shopUnit.getChildren().size();
         }
+        return 0;
     }
 }
