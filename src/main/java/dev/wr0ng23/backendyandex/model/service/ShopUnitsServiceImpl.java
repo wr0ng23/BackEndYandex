@@ -7,9 +7,9 @@ import dev.wr0ng23.backendyandex.model.repository.ShopUnitsRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
-import java.util.concurrent.atomic.AtomicInteger;
 
 @Service
 public class ShopUnitsServiceImpl implements ShopUnitsService {
@@ -83,23 +83,39 @@ public class ShopUnitsServiceImpl implements ShopUnitsService {
 
     private int findAllChildren(ShopUnit shopUnit) {
         var children = shopUnitsRepository.findAllByParentId(shopUnit.getId());
-        AtomicInteger size = new AtomicInteger();
         if (!children.isEmpty()) {
+            int size = 0;
+            int childrenSize = 0;
             shopUnit.setChildren(children);
-            children.forEach(child -> {
+            for (var child : children) {
                 if (child.getType() == ShopUnitType.CATEGORY) {
-                    size.addAndGet(findAllChildren(child));
+                    childrenSize = findAllChildren(child);
+                    size += childrenSize;
                 }
-                //Strashno
-                // Kogdato budet more beautiful but ne segodnya
-                shopUnit.setPrice(((shopUnit.getPrice() == null) ?
-                        0 : shopUnit.getPrice()) + ((child.getType() == ShopUnitType.CATEGORY) ?
-                        child.getPrice() * child.getChildren().size() : child.getPrice()));
-            });
-            shopUnit.setPrice(shopUnit.getPrice() / ((size.get() == 0) ?
-                    shopUnit.getChildren().size() : size.get()));
-            return shopUnit.getChildren().size();
+
+                int price = 0;
+                if (shopUnit.getPrice() != null) {
+                    price = shopUnit.getPrice();
+                }
+
+                if (child.getType() == ShopUnitType.CATEGORY) {
+                    price += (child.getPrice() == null) ? 0 : child.getPrice() * childrenSize;
+                } else {
+                    price += child.getPrice();
+                    size++;
+                }
+                shopUnit.setPrice(price);
+            }
+
+            shopUnit.setPrice(shopUnit.getPrice() / size);
+
+            return size;
         }
         return 0;
+    }
+
+    @Override
+    public List<ShopUnit> getSales(LocalDateTime date) {
+        return shopUnitsRepository.findAllByDateBetween(date.minusDays(1), date);
     }
 }
